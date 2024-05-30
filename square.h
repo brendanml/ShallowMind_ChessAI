@@ -1,5 +1,4 @@
 #pragma once
-#include "piece.h"
 // #include <iostream>
 #include <raylib.h>
 class Square {

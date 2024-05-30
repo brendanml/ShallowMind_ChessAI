@@ -2,13 +2,26 @@
 
 ## TODO
 - web asm uploadable
-- fix pawns jumping pieces
-- handle check scenarios
-  - problem with check calculations where king can just move himself into a different check
-    - need to update kings position
+<!-- - fix rank moves to not add moves that put it in check -->
+  - a bit smarter of an algorithm??
+    - rank based on danger?
+- implement piece upgrades
+- implement castling
+- implement enpassant
+- check for player checkmate scenarios
+- check system to determine stalemates
+- reformat reset function draw screens and updates
+- sounds
+- fix cmd z ai
 
 ## DONE CHECKLIST
-`checklist is reverse order (higher -> more recent)`\
+`checklist is reverse order (higher -> more recent)`
+- Constructed command to validate that moves AI attempts to choose don't put itself in check
+- Implemented AI to play against: constructed priority queue to add ranked moves, then AI picks a random move of the highest move value
+- changed potentialmoves int array to std::vector array of moves so the AI can use the existing methods for choosing his moves
+- rewrote all moves to use 'xy' structs instead of arbitrary std::vector indicies
+- cleaned up code structure for readability and modularity
+- fixed pawns jumping pieces on starting square
 - fixed bug where selecting white king on anything other than the first move would cause the game to crash
 - black king can now only make moves that puts him out of check (if in check)
 - basing logic around whether next move gets player out of check (figured out it doesn't matter if you're in check)

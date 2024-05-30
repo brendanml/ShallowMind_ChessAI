@@ -1,32 +1,43 @@
 #pragma once
 #include "square.h"
 #include "board.h"
-#include "piece.h"
 #include <string>
 class Player {
     public:
-        std::vector<int> start;
-        std::vector<int> end;
+        xy start;
+        xy end;
+
         bool turn;
         char color;
         bool selecting = true;
+        bool isAI = false;
+        bool turnStarting = true;
+        int turnCount = 0;
+        
+        bool wonGame = false;
+
+        // if player is AI
+        Timer timer;
+        int waitPeriod = 0;
+        double speedup = 1;
+
+
+
 
         Player(bool _turn, char _color) : turn(_turn), color(_color){
             start = {-1, -1};
             end = {-1, -1};
         }
-        void setDestination(std::vector<int> tileCoordinates);
-        void select(std::vector<int> tileCoordinates);
+        void setDestination(xy tileCoordinates);
+        void select(xy tileCoordinates);
 };
 
-void Player::select(std::vector<int> tileCoordinates) {
+void Player::select(xy tileCoordinates) {
     start = tileCoordinates;
     selecting = false;
 }
 
-void Player::setDestination(std::vector<int> tileCoordinates) {
+void Player::setDestination(xy tileCoordinates) {
     end = tileCoordinates;
-    std::cout << "you're moving from tile: " << start[0] << ", "<< start[1] << "to tile: " << end[0] << ", " << end[1] << std::endl;
-    // start = {-1, -1};
-    // end = {-1, -1}; // RESET POSITION WHEN? after move is executed?
+    std::cout << "you're moving from tile: " << start.x << ", "<< start.y << "to tile: " << end.x << ", " << end.y << std::endl;
 }

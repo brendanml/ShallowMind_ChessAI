@@ -5,7 +5,7 @@ COMP = g++
 FLAGS = -std=c++11 -Wall -lraylib -g -O0
 
 # Header files
-HDRS = board.h piece.h square.h player.h util.h
+HDRS = board.h square.h player.h util.h command.h input.h ui.h
 
 # Source file and executable name
 SRCS = main.cpp
