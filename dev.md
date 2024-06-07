@@ -2,20 +2,33 @@
 
 ## TODO
 - web asm uploadable
-<!-- - fix rank moves to not add moves that put it in check -->
-  - a bit smarter of an algorithm??
-    - rank based on danger?
-- implement piece upgrades
-- implement castling
-- implement enpassant
-- check for player checkmate scenarios
-- check system to determine stalemates
-- reformat reset function draw screens and updates
+- AI a bit smarter of an algorithm??
+  - determine danger/kill squares of opposing player prior to ranking moves
+  - prioritize AI putting opponent in safe checks
+  - rewrite determine moves to insert a 3 if its a piece its protecting
+- re-implement movement commands to make special moves possible
+  - implement castling
+  - en passant
+- update when piece moves
+  - special move stored in the move
+    - reset this var end of turn/undo
+- write read me
+
+- fix stalemates
+- add size/rescaling button
 - sounds
-- fix cmd z ai
+- developer console
 
 ## DONE CHECKLIST
 `checklist is reverse order (higher -> more recent)`
+- pawns now auto upgrade to queens when passing the board
+- fixed problem where pawns wasn't properly putting kings in check if on the last row
+- game now checks for checkmate scenarios prompting end of game screen
+- fixed attempting to restart game when piece selected causing game to crash
+- made game rescaleable based on single variable
+- refactored buttons that reset game state into a single function that resets all game state variables instead of being spread out everywhere
+- fixed some UI bugs in regards to the win % chance bar
+- reformatted draw functions
 - Constructed command to validate that moves AI attempts to choose don't put itself in check
 - Implemented AI to play against: constructed priority queue to add ranked moves, then AI picks a random move of the highest move value
 - changed potentialmoves int array to std::vector array of moves so the AI can use the existing methods for choosing his moves

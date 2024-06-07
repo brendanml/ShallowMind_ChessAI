@@ -1,7 +1,7 @@
 #pragma once
 #include <raylib.h>
 #define BOARDSIZE 8
-#define SQUARESIZE 128
+#define SQUARESIZE 96
 #define UIWIDTH 256
 #include <iostream>
 #include <random>
@@ -30,17 +30,6 @@ int random_integer(int min, int max) {
     return distrib(gen); // Generate the random number
 }
 
-void visualizeArray(int arr[8][8]) {
-    // Print the array with some formatting
-    for (int i = 0; i < 8; ++i) {
-        for (int j = 0; j < 8; ++j) {
-            // setw(4) ensures each number takes up 4 spaces for alignment
-            std::cout << std::setw(4) << arr[i][j];
-        }
-        std::cout << std::endl;
-    }
-    std::cout << "*******" << std::endl;
-}
 
 void zeroIntArray(int (&ints)[BOARDSIZE][BOARDSIZE]) {
     for(int i = 0; i<BOARDSIZE; i++) {
@@ -71,6 +60,17 @@ struct Move{
     std::string piece;
     Move(int t, xy s, xy e, const std::string& p) : type(t), start(s), end(e), piece(p) {}
 };
+void visualizeArray(std::vector<Move> arr[BOARDSIZE][BOARDSIZE]) {
+    // Print the array with some formatting
+    for (int i = 0; i < 8; ++i) {
+        for (int j = 0; j < 8; ++j) {
+            // setw(4) ensures each number takes up 4 spaces for alignment
+            std::cout << std::setw(4) << (!arr[i][j].empty() ? arr[i][j].front().type : 0);
+        }
+        std::cout << std::endl;
+    }
+    std::cout << "*******" << std::endl;
+}
 void zeroMoveArray(std::vector<Move> (&moves)[BOARDSIZE][BOARDSIZE]) {
     for(int i = 0; i<BOARDSIZE; i++) {
         for(int j = 0; j<BOARDSIZE; j++) {

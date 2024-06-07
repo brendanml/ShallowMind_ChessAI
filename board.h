@@ -1,4 +1,4 @@
-#pragma once
+ #pragma once
 #include "util.h"
 #include "square.h"
 #include "raylib.h"
@@ -11,10 +11,14 @@ class Board {
     public:
         Square board[BOARDSIZE][BOARDSIZE];
         std::vector<Move> highlights[BOARDSIZE][BOARDSIZE];
+        xy lastMove = {-1, -1};
         xy wkingPosition;
         xy bkingPosition;
+        Color tileSelectedColor = ORANGE;
+        Color lastMoveColor = { 255, 109, 194, 80 };
         Board() {
             spritesheet = LoadImage("./assets/pieces.png");
+            ImageResize(&spritesheet, 6*SQUARESIZE, 2*SQUARESIZE);
             sprites = LoadTextureFromImage(spritesheet);
             resetBoard();
         }
@@ -31,13 +35,15 @@ class Board {
         void initBishops();
         void initKings();
         void initQueens();
-        void computeScore(std::string nextPieceName, int mod);
+        void computeUpdatedScore(std::string nextPieceName, int mod);
+        void computeScore();
+        bool checkCheck(char color); //check if player is in check
         void move(xy prev, xy next, std::string nextPieceName, std::string prevPieceName);
         void undo(xy prev, xy next, std::string nextPieceName, std::string prevPieceName);
         void highlightTile(xy selected, bool removeHighlight);
         // high is an arbitrary int grid that determines potential moves -- used for many things like check, bots, players moves, etc
         void determineMoves(xy selected, std::string piece, std::vector<Move> (&potentialMoves)[BOARDSIZE][BOARDSIZE], Square (&bord)[BOARDSIZE][BOARDSIZE]); //dtermines all moves for piece given name
-        void determineAllPieces(char color, Board &tempBoard, std::vector<Move> (&potentialMoves)[BOARDSIZE][BOARDSIZE]); // calls determine moves for all pieces of a given side (white or black)
+        void determineAllPieces(char color, Square (&squares)[BOARDSIZE][BOARDSIZE], std::vector<Move> (&potentialMoves)[BOARDSIZE][BOARDSIZE]); // calls determine moves for all pieces of a given side (white or black)
         void determineRook(xy selected, std::vector<Move> (&potentialMoves)[BOARDSIZE][BOARDSIZE], Square (&bord)[BOARDSIZE][BOARDSIZE]);
         void determineBishop(xy selected, std::vector<Move> (&potentialMoves)[BOARDSIZE][BOARDSIZE], Square (&bord)[BOARDSIZE][BOARDSIZE]);
         void determineQueen(xy selected, std::vector<Move> (&potentialMoves)[BOARDSIZE][BOARDSIZE], Square (&bord)[BOARDSIZE][BOARDSIZE]);
@@ -46,6 +52,7 @@ class Board {
         void determineKnight(xy selected, std::vector<Move> (&potentialMoves)[BOARDSIZE][BOARDSIZE], Square (&bord)[BOARDSIZE][BOARDSIZE]);
         void knightHelper(xy selected, char selectedCol, std::vector<Move> (&potentialMoves)[BOARDSIZE][BOARDSIZE], Square (&bord)[BOARDSIZE][BOARDSIZE], int nextX, int nextY);
         void determineKing(xy selected, std::vector<Move> (&potentialMoves)[BOARDSIZE][BOARDSIZE], Square (&bord)[BOARDSIZE][BOARDSIZE]);
+        bool determineCastling(xy start, xy end);
         std::priority_queue<Element, std::vector<Element>, Compare> rankMoves(char playerColor, std::vector<Move> (&potentialMoves)[BOARDSIZE][BOARDSIZE], Board &board);
         xy findKing(char color, Square (&bord)[BOARDSIZE][BOARDSIZE]);
         // check if piece is takeable - for king
@@ -65,8 +72,10 @@ std::priority_queue<Element, std::vector<Element>, Compare> Board::rankMoves(cha
     std::priority_queue<Element, std::vector<Element>, Compare> maxHeap;
     // need a way to mark tiles that are covered by other pieces (if we take a piece right now it won't show that an opposing piece could take it because one of their own pieces used to be there)
     // std::vector<Move> opposingMoves[BOARDSIZE][BOARDSIZE];
-    // if(playerColor == 'b') { board.determineAllPieces('w', board, opposingMoves);}
-    // else if(playerColor == 'w') board.determineAllPieces('b', board, opposingMoves);
+    // if(playerColor == 'b') { board.determineAllPieces('w', board.board, opposingMoves);}
+    // else if(playerColor == 'w') board.determineAllPieces('b', board.board, opposingMoves);
+
+    // visualizeArray(opposingMoves);
 
 
     for(int i = 0; i<BOARDSIZE; i++) {
@@ -77,13 +86,13 @@ std::priority_queue<Element, std::vector<Element>, Compare> Board::rankMoves(cha
                 potentialMoves[i][j].pop_back();
                 std::string taking = board.board[curr.end.y][curr.end.x].piece.substr(1, board.board[curr.end.y][curr.end.x].piece.length());
                 // default "none" value is 0
-                int myPieceValue = 0;
+                // int myPieceValue = 0;
                 int takingPieceValue = 0;
-                if(curr.piece == "queen") {myPieceValue = 10;}
-                else if(curr.piece == "pawn") {myPieceValue = 1;}
-                else if(curr.piece == "rook") {myPieceValue = 5;}
-                else if(curr.piece == "bishop") {myPieceValue = 3;}
-                else if(curr.piece == "knight") {myPieceValue = 3;}
+                // if(curr.piece == "queen") {myPieceValue = 10;}
+                // else if(curr.piece == "pawn") {myPieceValue = 1;}
+                // else if(curr.piece == "rook") {myPieceValue = 5;}
+                // else if(curr.piece == "bishop") {myPieceValue = 3;}
+                // else if(curr.piece == "knight") {myPieceValue = 3;}
 
                 if(taking == "queen") {takingPieceValue = 10;}
                 else if(taking == "pawn") {takingPieceValue = 1;}
@@ -102,6 +111,7 @@ std::priority_queue<Element, std::vector<Element>, Compare> Board::rankMoves(cha
 }
 
 void Board::resetBoard() {
+    lastMove = {-1, -1};
     clearBoard();
     clearHighlights();
     initPawns();
@@ -120,6 +130,23 @@ void Board::clearHighlights() {
     }
 }
 
+bool Board::checkCheck(char currPlayer) {
+    Square squares[BOARDSIZE][BOARDSIZE];
+    std::vector<Move> moves[BOARDSIZE][BOARDSIZE];
+    copyBoard(squares, board);
+    if(currPlayer == 'w') {determineAllPieces('b', squares, moves);}
+    else if(currPlayer == 'b') determineAllPieces('w', squares, moves);
+    if(currPlayer == 'w' && (!moves[wkingPosition.y][wkingPosition.x].empty() && moves[wkingPosition.y][wkingPosition.x].front().type == 2)) { 
+        std::cout << "white is in check, protect it!" << std::endl; 
+        return true;
+    }
+    else if(currPlayer == 'b' && (!moves[bkingPosition.y][bkingPosition.x].empty() && moves[bkingPosition.y][bkingPosition.x].front().type == 2)) {
+        std::cout << "black is in check, protect it!" << std::endl;
+        return true;
+        // only commiting to creating movement commands if it doesn't put the player in check
+    }
+    return false;
+}
 
 void Board::clearBoard() {
     for(int i = 0; i < BOARDSIZE; i++) {
@@ -130,16 +157,16 @@ void Board::clearBoard() {
     }
 }
 
-void Board::determineAllPieces(char color, Board &tempBoard, std::vector<Move> (&potentialMoves)[BOARDSIZE][BOARDSIZE]) {
+void Board::determineAllPieces(char color, Square (&squares)[BOARDSIZE][BOARDSIZE], std::vector<Move> (&potentialMoves)[BOARDSIZE][BOARDSIZE]) {
     for(int i = 0; i<BOARDSIZE; i++) {
         for(int j = 0; j<BOARDSIZE; j++) {
             // check OPPOSING MOVES for EACH piece
-            std::string currPieceName = tempBoard.board[i][j].piece;
+            std::string currPieceName = squares[i][j].piece;
             std::string truePieceName = currPieceName.substr(1, currPieceName.length()-1);
             if(currPieceName[0]==color) {
                 // remember j = x, i = y
                 xy sel = {j, i};
-                tempBoard.determineMoves(sel, truePieceName, potentialMoves, tempBoard.board);
+                determineMoves(sel, truePieceName, potentialMoves, squares);
             }
         }
     }
@@ -160,7 +187,6 @@ void Board::determineKing(xy sel, std::vector<Move> (&potentialMoves)[BOARDSIZE]
 // top and to right
     char selectedCol = getPiece(sel)[0];
     // majority of cases -> highlight all surrounding pieces
-    // determineCastling();
 
     kingMoveable(sel, sel.x - 1, sel.y - 1, selectedCol, potentialMoves, bord);
     kingMoveable(sel, sel.x, sel.y - 1, selectedCol, potentialMoves, bord);
@@ -171,10 +197,6 @@ void Board::determineKing(xy sel, std::vector<Move> (&potentialMoves)[BOARDSIZE]
     kingMoveable(sel, sel.x - 1, sel.y + 1, selectedCol, potentialMoves, bord);
     kingMoveable(sel, sel.x - 1, sel.y, selectedCol, potentialMoves, bord);
 }
-
-// void Board::determineCastling() {
-
-// }
 
 void Board::kingMoveable(xy sel, int currX, int currY, char selectedCol, std::vector<Move> (&potentialMoves)[BOARDSIZE][BOARDSIZE], Square (&bord)[BOARDSIZE][BOARDSIZE]) {
     // check x within bounds
@@ -260,6 +282,47 @@ void Board::determineRook(xy selected, std::vector<Move> (&potentialMoves)[BOARD
             if(curr == "none") {
                 potentialMoves[selected.y][next].push_back(Move {1, selected, xy{next, selected.y}, "rook"});
             } else break;
+        }
+    }
+    if(selected.x == 0 && selected.y == 0 && bord[0][4].truePiece() == "king") {
+        if(bord[selected.y][selected.x].pieceMoved == false && bord[0][4].pieceMoved == false) {
+            if(bord[0][1].piece[0] == 'n' && bord[0][2].piece[0] == 'n' && bord[0][3].piece[0] == 'n') {
+                potentialMoves[0][4].push_back(Move {1, selected, xy{0, 4}, "rook"});
+                std::cout << "CASTLING SCENARIO 1" << std::endl;
+            }
+        }
+    }
+    if(selected.x == 7 && selected.y == 0 && bord[0][4].truePiece() == "king") {
+        if(bord[selected.y][selected.x].pieceMoved == false && bord[0][4].pieceMoved == false) {
+            if(bord[0][6].piece[0] == 'n' && bord[0][5].piece[0] == 'n') {
+                potentialMoves[0][4].push_back(Move {1, selected, xy{0, 4}, "rook"});
+                std::cout << "CASTLING SCENARIO 2" << std::endl;
+            }
+        }
+    }
+    if(selected.x == 0 && selected.y == 7 && bord[7][4].truePiece() == "king") {
+        if(bord[selected.y][selected.x].pieceMoved == false && bord[7][4].pieceMoved == false) {
+            if(bord[7][1].piece[0] == 'n' && bord[7][2].piece[0] == 'n' && bord[7][3].piece[0] == 'n') {
+                potentialMoves[7][4].push_back(Move {1, selected, xy{7, 4}, "rook"});
+                std::cout << "CASTLING SCENARIO 3" << std::endl;
+            }
+        }
+    }
+    if(selected.x == 7 && selected.y == 7 && bord[7][4].truePiece() == "king") {
+        if(bord[selected.y][selected.x].pieceMoved == false && bord[0][4].pieceMoved == false) {
+            if(bord[7][6].piece[0] == 'n' && bord[7][5].piece[0] == 'n') {
+                potentialMoves[7][4].push_back(Move {1, selected, xy{7, 4}, "rook"});
+                std::cout << "CASTLING SCENARIO 4" << std::endl;
+            }
+        }
+    }
+}
+
+bool Board::determineCastling(xy start, xy end) {
+    // castling scenario: we have selected rook, check if destination is king - remember queen calls this method
+    if(start.y == start.x &&((board[start.y][start.x].truePiece() == "rook" && board[end.y][end.x].truePiece() == "king") || (board[start.y][start.x].truePiece() == "king" && board[end.y][end.x].truePiece() == "rook"))) {
+        if(board[start.y][start.x].pieceMoved == false && board[start.y][start.x].pieceMoved == false) {
+            std::cout << "SUPER !!!! CASTLING SCENARIO" << std::endl;
         }
     }
 }
@@ -389,22 +452,43 @@ void Board::pawnHelper(int dir, char selectedCol, xy selected, std::vector<Move>
         int nextX = selected.x-1;
         // taking piece left
         if(nextX >= 0) {
-            if((selectedCol == 'b' && bord[nextY][nextX].piece[0] == 'w') || (selectedCol == 'w' && bord[nextY][nextX].piece[0] == 'b')) potentialMoves[nextY][nextX].push_back(Move {2, selected, xy{nextX, nextY}, "pawn"});
+            if((selectedCol == 'b' && bord[nextY][nextX].piece[0] == 'w') || (selectedCol == 'w' && bord[nextY][nextX].piece[0] == 'b')) {
+                if(nextY == 0 || nextY == 7) {
+                    potentialMoves[nextY][nextX].push_back(Move {2, selected, xy{nextX, nextY}, "queen"});
+                }
+                else potentialMoves[nextY][nextX].push_back(Move {2, selected, xy{nextX, nextY}, "pawn"});
+            }
         }
         nextX = selected.x+1;
         // taking piece right
         if(nextX <= 7) {
-            if((selectedCol == 'b' && bord[nextY][nextX].piece[0] == 'w') || (selectedCol == 'w' && bord[nextY][nextX].piece[0] == 'b')) potentialMoves[nextY][nextX].push_back(Move {2, selected, xy{nextX, nextY}, "pawn"});
+            if((selectedCol == 'b' && bord[nextY][nextX].piece[0] == 'w') || (selectedCol == 'w' && bord[nextY][nextX].piece[0] == 'b')) {
+                if(nextY == 0 || nextY == 7) {
+                    potentialMoves[nextY][nextX].push_back(Move {2, selected, xy{nextX, nextY}, "queen"});
+                }
+                else potentialMoves[nextY][nextX].push_back(Move {2, selected, xy{nextX, nextY}, "pawn"});
+            }
         }
+
+
         // moving 1 forward
         nextX = selected.x;
-        if(bord[nextY][nextX].piece[0] == 'n') potentialMoves[nextY][nextX].push_back(Move {1, selected, xy{nextX, nextY}, "pawn"});
+        if(bord[nextY][nextX].piece[0] == 'n') {
+            if(nextY == 0 || nextY == 7) {
+                potentialMoves[nextY][nextX].push_back(Move {1, selected, xy{nextX, nextY}, "queen"});
+            }
+            else potentialMoves[nextY][nextX].push_back(Move {1, selected, xy{nextX, nextY}, "pawn"});
+        }
+
+        // 2 move from start
         if((selected.y==1 || selected.y==6)&& bord[selected.y+(1*dir)][selected.x].piece[0] == 'n') {
             nextY = selected.y + (2*dir);
-            if(bord[nextY][nextX].piece[0] == 'n') {
+            if(nextY <= 7 && nextY >= 0 && bord[nextY][nextX].piece[0] == 'n') {
                 potentialMoves[nextY][nextX].push_back(Move {1, selected, xy{nextX, nextY}, "pawn"});
             }
         }
+
+
     }
 
 }
@@ -421,18 +505,19 @@ void Board::move(xy prev, xy next, std::string nextPieceName, std::string prevPi
     // update score each time, mod param is to allow undo to inc score
     board[prev.y][prev.x].changePiece("none");
     board[next.y][next.x].changePiece(prevPieceName);
+    lastMove = {next.x, next.y};
     int mod = 1;
-    computeScore(nextPieceName, mod);
+    computeUpdatedScore(nextPieceName, mod);
 }
 void Board::undo(xy prev, xy next, std::string nextPieceName, std::string prevPieceName) {
     board[prev.y][prev.x].changePiece(prevPieceName);
     board[next.y][next.x].changePiece(nextPieceName);
     int mod = -1;
-    computeScore(nextPieceName, mod);
+    computeUpdatedScore(nextPieceName, mod);
 }
 
 // update score each time, mod param is to allow undo to inc score
-void Board::computeScore(std::string nextPieceName, int mod) {
+void Board::computeUpdatedScore(std::string nextPieceName, int mod) {
     std::string player = nextPieceName.substr(0, 1);
     if(player == "n") return;
     std::string truePiece = nextPieceName.substr(1, nextPieceName.length()-1);
@@ -444,7 +529,10 @@ void Board::computeScore(std::string nextPieceName, int mod) {
     if(truePiece == "bishop") player == "w" ? whiteScore -= 3*mod : blackScore -= 3*mod;
 
     // std::cout << "blacks score is: " << blackScore << "whites score is: " << whiteScore << std::endl;
+    computeScore();
+}
 
+void Board::computeScore() {
     whiteRatio = pow(whiteScore * 2 / (whiteScore + blackScore), 3) ;
     blackRatio = pow(blackScore * 2 / (blackScore + whiteScore), 3) ;
 }
@@ -544,15 +632,18 @@ void Board::draw() {
             float y = i*SQUARESIZE;
             float x = j*SQUARESIZE;
             DrawRectangle(x, y, SQUARESIZE, SQUARESIZE, board[i][j].color);
+            if((lastMove.x != -1 && lastMove.y != -1) && lastMove.x == j && lastMove.y == i) {
+                DrawRectangle(lastMove.x*SQUARESIZE, lastMove.y*SQUARESIZE, SQUARESIZE, SQUARESIZE, lastMoveColor);
+            }
             if(!highlights[i][j].empty() && highlights[i][j].front().type == 1) DrawCircle(x +(SQUARESIZE/2), y+(SQUARESIZE/2), SQUARESIZE/4, Color {0, 0 , 0, 50});
-            if(board[i][j].selected) DrawRectangle(x, y, SQUARESIZE, SQUARESIZE, board[i][j].selectedColor);
+            if(board[i][j].selected) DrawRectangle(x, y, SQUARESIZE, SQUARESIZE, tileSelectedColor);
             Rectangle sprite = {0, 0, SQUARESIZE, SQUARESIZE};
             if(board[i][j].piece == "none") {
             } else if (board[i][j].piece == "wpawn") {
                 sprite = {0, 0, SQUARESIZE, SQUARESIZE};
                 DrawTextureRec(sprites, sprite, Vector2{x, y}, WHITE);
             } else if (board[i][j].piece == "bpawn") {
-                sprite = {0, 128, SQUARESIZE, SQUARESIZE};
+                sprite = {0, SQUARESIZE, SQUARESIZE, SQUARESIZE};
                 DrawTextureRec(sprites, sprite, Vector2{x, y}, WHITE);
             } else if (board[i][j].piece == "brook") {
                 sprite = {3*SQUARESIZE, SQUARESIZE, SQUARESIZE, SQUARESIZE};

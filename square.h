@@ -4,9 +4,10 @@
 class Square {
     public:
         Color color;
-        Color selectedColor = ORANGE;
+        
         std::string piece = "none";
         bool selected = false;
+        bool pieceMoved = false;
         Square() {
 
         }
@@ -16,14 +17,12 @@ class Square {
         }
         ~Square() {}
         void changePiece(std::string pieceName);
-        void changeColor(Color _color);
+        std::string truePiece();
 };
 
 void Square::changePiece(std::string pieceName) {
     piece = pieceName;
 }
-
-void Square::changeColor(Color _color) {
-    std::cout << "WERE CHANGING THE COLOR TO RED" << std::endl;
-    color = _color;
+std::string Square::truePiece() {
+    return piece.substr(1, piece.length()-1);
 }

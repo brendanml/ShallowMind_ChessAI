@@ -7,7 +7,9 @@ class Player {
         xy start;
         xy end;
 
-        bool turn;
+        bool inCheck = false;
+
+        bool turn = false;
         char color;
         bool selecting = true;
         bool isAI = false;
@@ -15,6 +17,8 @@ class Player {
         int turnCount = 0;
         
         bool wonGame = false;
+        bool lostGame = false;
+
 
         // if player is AI
         Timer timer;
@@ -30,6 +34,7 @@ class Player {
         }
         void setDestination(xy tileCoordinates);
         void select(xy tileCoordinates);
+        void endTurn();
 };
 
 void Player::select(xy tileCoordinates) {

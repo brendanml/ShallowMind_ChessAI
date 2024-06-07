@@ -13,7 +13,7 @@ class UI {
     private:
     int padding = 12;
     int cpadding = BOARDSIZE*SQUARESIZE + padding;
-    int barMargin = 256;
+    int barMargin = 2*SQUARESIZE;
 
 };
 
@@ -24,14 +24,18 @@ void UI::draw(Player white, Player black, Board board) {
 }
 
 void::UI::drawBar(Board board) {
-    float whiteHeight = 256*board.whiteRatio;
-    float blackHeight = 256*board.blackRatio;
+    float whiteHeight = SQUARESIZE*2*board.whiteRatio;
+    float blackHeight = SQUARESIZE*2*board.blackRatio;
     float widthMargin = UIWIDTH - (padding*2);
     if(board.frontColor == "black") {
-        DrawRectangle(cpadding, barMargin, widthMargin, 512, Color {105, 127, 150, 255});
-        DrawRectangle(cpadding, barMargin, widthMargin, whiteHeight, Color {255, 255, 255, 255});
+        DrawRectangle(cpadding, barMargin, widthMargin, SQUARESIZE*4, Color {105, 127, 150, 255});
+        // bandaid fix, sometimes winning side overflows 100%
+        if(whiteHeight>SQUARESIZE*4) whiteHeight = SQUARESIZE*4;
+        DrawRectangle(cpadding, barMargin, widthMargin, whiteHeight, WHITE);
     } else if(board.frontColor == "white") {
-        DrawRectangle(cpadding, barMargin, widthMargin, 512, WHITE);
+        DrawRectangle(cpadding, barMargin, widthMargin, SQUARESIZE*4, WHITE);
+        // bandaid fix, sometimes winning side overflows 100%
+        if(blackHeight>SQUARESIZE*4) blackHeight = SQUARESIZE*4;
         DrawRectangle(cpadding, barMargin, widthMargin, blackHeight, Color {105, 127, 150, 255});
     }
 }

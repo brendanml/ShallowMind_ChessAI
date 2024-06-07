@@ -12,52 +12,71 @@ class Command {
 class MovePieceCommand : public Command {
     public:
     MovePieceCommand(Player *_player, Board*_board) :
-        prev(_player->start), next(_player->end), board(_board), player(_player)
+        start(_player->start), end(_player->end), board(_board), player(_player)
     {
-        prevPieceName = board->getPiece(prev);
-        nextPieceName = board->getPiece(next);
+        startPiece = board->getPiece(start);
+        
+        //determine if upgrading pawn
+        std::string truePiece = startPiece.substr(1, startPiece.length()-1);
+        if ((end.y == 0 || end.y == 7) && truePiece == "pawn") {
+        // Upgrade the pawn to a queen by keeping the prefix (presumably the color)
+            newPiece = startPiece[0] + std::string("queen");
+        } else {
+            newPiece = startPiece;
+        }
+
+
+
+        endPiece = board->getPiece(end);
         pColor = _player->color;
     }
     ~MovePieceCommand() {}
     void execute() {
         // if player has selected own piece
-        char pSelectedColor = prevPieceName[0];
+        char pSelectedColor = newPiece[0];
         if (pColor == pSelectedColor) {
-            if(prevPieceName.substr(1, prevPieceName.length()) == "king") {
+            if(newPiece.substr(1, newPiece.length()) == "king") {
                 if(pColor == 'b') {
-                    board->bkingPosition = next;
+                    board->bkingPosition = end;
                 }
                 if(pColor == 'w') {
-                    board->wkingPosition = next;
+                    board->wkingPosition = end;
                 }
             }
-            board->move(prev, next, nextPieceName, prevPieceName);
+            board->move(start, end, endPiece, newPiece);
             player->turnCount +=1;
         } else {printf("NOT YOUR PIECE");}
     }
 
     void undo() {
-        board->undo(prev, next, nextPieceName, prevPieceName);
+        board->undo(start, end, endPiece, startPiece);
         player->turnCount -=1;
-        if(prevPieceName.substr(1, prevPieceName.length()) == "king") {
+        if(startPiece.substr(1, startPiece.length()) == "king") {
             if(pColor == 'b') {
-                board->bkingPosition = prev;
+                board->bkingPosition = start;
             }
             if(pColor == 'w') {
-                board->wkingPosition = prev;
+                board->wkingPosition = start;
             }
         }
     }
 
 
     private:
-        std::string prevPieceName;
-        xy prev;
-        xy next;
+        bool castling;
+        xy newStart;
+        xy newEnd;
+
+        std::string startPiece;
+        std::string endPiece;
+        std::string newPiece;
+        xy start;
+        xy end;
         Board* board;
         char pColor;
-        std::string nextPieceName;
         Player* player;
+        int addedScore = 0;
+        int substractedScore = 0;
 };
 
 void freeCommands(std::stack<Command*> &undoStack, std::queue<Command*> &cmdQueue) {
