@@ -63,9 +63,6 @@ class MovePieceCommand : public Command {
 
 
     private:
-        bool castling;
-        xy newStart;
-        xy newEnd;
 
         std::string startPiece;
         std::string endPiece;
@@ -75,8 +72,6 @@ class MovePieceCommand : public Command {
         Board* board;
         char pColor;
         Player* player;
-        int addedScore = 0;
-        int substractedScore = 0;
 };
 
 void freeCommands(std::stack<Command*> &undoStack, std::queue<Command*> &cmdQueue) {

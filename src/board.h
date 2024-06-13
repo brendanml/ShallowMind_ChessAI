@@ -17,7 +17,7 @@ class Board {
         Color tileSelectedColor = ORANGE;
         Color lastMoveColor = { 255, 109, 194, 80 };
         Board() {
-            spritesheet = LoadImage("./assets/pieces.png");
+            spritesheet = LoadImage("../assets/pieces.png");
             ImageResize(&spritesheet, 6*SQUARESIZE, 2*SQUARESIZE);
             sprites = LoadTextureFromImage(spritesheet);
             resetBoard();
@@ -318,14 +318,14 @@ void Board::determineRook(xy selected, std::vector<Move> (&potentialMoves)[BOARD
     }
 }
 
-bool Board::determineCastling(xy start, xy end) {
-    // castling scenario: we have selected rook, check if destination is king - remember queen calls this method
-    if(start.y == start.x &&((board[start.y][start.x].truePiece() == "rook" && board[end.y][end.x].truePiece() == "king") || (board[start.y][start.x].truePiece() == "king" && board[end.y][end.x].truePiece() == "rook"))) {
-        if(board[start.y][start.x].pieceMoved == false && board[start.y][start.x].pieceMoved == false) {
-            std::cout << "SUPER !!!! CASTLING SCENARIO" << std::endl;
-        }
-    }
-}
+// bool Board::determineCastling(xy start, xy end) {
+//     // castling scenario: we have selected rook, check if destination is king - remember queen calls this method
+//     if(start.y == start.x &&((board[start.y][start.x].truePiece() == "rook" && board[end.y][end.x].truePiece() == "king") || (board[start.y][start.x].truePiece() == "king" && board[end.y][end.x].truePiece() == "rook"))) {
+//         if(board[start.y][start.x].pieceMoved == false && board[start.y][start.x].pieceMoved == false) {
+//             std::cout << "SUPER !!!! CASTLING SCENARIO" << std::endl;
+//         }
+//     }
+// }
 
 void Board::determineBishop(xy selected, std::vector<Move> (&potentialMoves)[BOARDSIZE][BOARDSIZE], Square (&bord)[BOARDSIZE][BOARDSIZE]) {
     

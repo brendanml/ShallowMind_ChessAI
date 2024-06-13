@@ -83,7 +83,7 @@ class Game {
 
 
         Game() {
-            spritesheet = LoadImage("./assets/pawns.png");
+            spritesheet = LoadImage("../assets/pawns.png");
             ImageResize(&spritesheet, 4*SQUARESIZE, 8*SQUARESIZE);
             sprites = LoadTextureFromImage(spritesheet);
         }
@@ -337,7 +337,7 @@ void Game::drawColorSelection() {
 
 
 int main () {
-    InitWindow(SQUARESIZE*BOARDSIZE + UIWIDTH, SQUARESIZE*BOARDSIZE, "Chess Command Pattern");
+    InitWindow(SQUARESIZE*BOARDSIZE + UIWIDTH, SQUARESIZE*BOARDSIZE, "ShallowMind: ChessAI");
     SetWindowPosition(0,0);
     SetTargetFPS(60);
     Game game;
