@@ -1,17 +1,15 @@
 # Compiler
-COMP = g++
-
-PKGS = raylib
+COMP = clang++
 
 # Compiler flags
-FLAGS = -std=c++11 -Wall $(shell pkg-config --libs $(PKGS)) $(shell pkg-config --cflags $(PKGS))
+FLAGS = -std=c++11 -Wall -framework CoreVideo -framework IOKit -framework Cocoa -framework GLUT -framework OpenGL ../libraylib.a -I ../../raylib/src
 
 # Header files
 HDRS = board.h square.h player.h util.h command.h input.h ui.h
 
 # Source file and executable name
 SRCS = main.cpp
-EXEC = game
+EXEC = app
 
 # Build target
 all: $(EXEC)
