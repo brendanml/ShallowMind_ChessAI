@@ -11,6 +11,7 @@
 #include "command.h"
 #include "input.h"
 #include "ui.h"
+#include "../Resources/pawns.h"
 
 
 // BANDAID FIX TO RESET THE BOARD ONLY AFTER COLOR HAS BEEN SELECTED
@@ -37,6 +38,8 @@ class Game {
 
         // assets
         Image spritesheet;
+        Image biking;
+        Texture2D bikingtx;
 
         Texture2D sprites;
 
@@ -62,8 +65,8 @@ class Game {
         Rectangle mpButton = {windowCenter + buttonMargin, boardWH/2-(buttonSize/2), buttonSize, buttonSize};
 
         // select colors
-        Rectangle whiteButton = {boardWH/2 - (SQUARESIZE), boardWH/2, buttonSize, buttonSize};
-        Rectangle blackButton = {boardWH/2 + (SQUARESIZE), boardWH/2, buttonSize, buttonSize};
+        Rectangle whiteButton = {windowCenter - buttonSize - buttonMargin, boardWH/2-(buttonSize/2), buttonSize, buttonSize};
+        Rectangle blackButton = {windowCenter + buttonMargin, boardWH/2-(buttonSize/2), buttonSize, buttonSize};
 
         // start over button
         float startOverWidth = 232;
@@ -83,9 +86,16 @@ class Game {
 
 
         Game() {
-            spritesheet = LoadImage("../assets/pawns.png");
-            ImageResize(&spritesheet, 4*SQUARESIZE, 8*SQUARESIZE);
+            spritesheet = {0};
+            spritesheet.format = PAWNS_FORMAT;
+            spritesheet.height = PAWNS_HEIGHT;
+            spritesheet.width = PAWNS_WIDTH;
+            spritesheet.data = PAWNS_DATA;
+            spritesheet.mipmaps = 1;
             sprites = LoadTextureFromImage(spritesheet);
+            biking = LoadImage("../Resources/bike.png");
+            bikingtx = LoadTexture("../Resources/bike.png");
+            
         }
         // draws
         ~Game() {
@@ -125,10 +135,8 @@ void Game::resetGame() {
     drawBoard = false;
     selectColor = false;
     gameover = false;
-    board.blackScore = 40;
-    board.whiteScore = 40;
-    board.computeScore();
     board.resetBoard();
+    board.computeScore();
     delete black;
     delete white;
     black = new Player(false, 'b');
@@ -139,11 +147,11 @@ void Game::updateAIBattle(Vector2 pos) {
     if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
         // only get to choose color if selected single player
         if(CheckCollisionPointRec(pos, rec_ai)) {
-            selectPlayerCount = false;
-            drawBoard = true;
             selectColor = false;
+            selectPlayerCount = false;
+            board.initPieces("white");
+            drawBoard = true;
             gameover = false;
-            board.frontColor = "white";
             black->isAI = true;
             white->isAI = true;
             black->speedup = 10;
@@ -215,6 +223,7 @@ void Game::updateSelectPlayerCount(Vector2 pos) {
             std::cout << "THE MODE IS: " << mode << std::endl;
         }
         if(CheckCollisionPointRec(pos, mpButton)) {
+            board.initPieces("white");
             mode = "mp";
             selectPlayerCount = false;
             selectColor = false;
@@ -225,9 +234,11 @@ void Game::updateSelectPlayerCount(Vector2 pos) {
 }
 void Game::updateSelectColor(Vector2 pos) {
     if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+        std::cout << "CLICKED A SELECT COLOUR BUTTOn" << std::endl;
         if(CheckCollisionPointRec(pos, whiteButton)) {
             std::cout << "SELECTED COLOR WHITE " << std::endl;
-            board.frontColor = "white";
+            board.resetBoard();
+            board.initPieces("white");
             black->isAI = true;
             white->isAI = false;
             selectColor = false;
@@ -235,8 +246,8 @@ void Game::updateSelectColor(Vector2 pos) {
         }
         if(CheckCollisionPointRec(pos, blackButton)) {
             std::cout << "SELECTED COLOR BLACK "  << std::endl;
-            board.frontColor = "black";
             board.resetBoard();
+            board.initPieces("black");
             white->isAI = true;
             black->isAI = false;
             selectColor = false;
@@ -272,9 +283,14 @@ void Game::draw() {
     if(selectPlayerCount) {
         drawSelectPlayerCount();
         drawAIBattle();
+        DrawRectangleLinesEx(spButton, 3.0, GRAY);
+        DrawRectangleLinesEx(mpButton, 3.0, GRAY);
     } else if(selectColor){
         drawColorSelection();
         drawBack();
+        DrawRectangleLinesEx(whiteButton, 3.0, GRAY);
+        DrawRectangleLinesEx(blackButton, 3.0, GRAY);
+        DrawTexture(bikingtx, 0, 0, WHITE);
     } else if(drawBoard){
         board.draw();
         if(!gameover) drawStartOver();
@@ -327,8 +343,8 @@ void Game::drawColorSelection() {
     DrawText(playerColour, windowCenter-(offset/2), 128, uiFontSize, WHITE);
     DrawRectangle(spButton.x, spButton.y, buttonSize, buttonSize, WHITE);
     Rectangle largeWhite = {0, 0, 4*SQUARESIZE, 4*SQUARESIZE};
-
     DrawTextureRec(sprites, largeWhite, Vector2{spButton.x, spButton.y}, WHITE);
+
     DrawRectangle(mpButton.x, mpButton.y, buttonSize, buttonSize, WHITE);
     Rectangle largeBlack = {0, 4*SQUARESIZE, 4*SQUARESIZE, 4*SQUARESIZE};
     DrawTextureRec(sprites, largeBlack, Vector2{mpButton.x, mpButton.y}, WHITE);

@@ -2,7 +2,7 @@
 COMP = clang++
 
 # Compiler flags
-FLAGS = -std=c++11 -Wall -framework CoreVideo -framework IOKit -framework Cocoa -framework GLUT -framework OpenGL ../libraylib.a -I ../../raylib/src
+FLAGS = -std=c++11 -Wall -framework CoreVideo -framework IOKit -framework Cocoa -framework GLUT -framework OpenGL ../lib/libraylib.a -I ../../raylib/src
 
 # Header files
 HDRS = board.h square.h player.h util.h command.h input.h ui.h
