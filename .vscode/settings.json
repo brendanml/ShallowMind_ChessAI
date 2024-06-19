@@ -74,6 +74,9 @@
         "semaphore": "cpp",
         "sstream": "cpp",
         "stack": "cpp",
-        "list": "cpp"
+        "list": "cpp",
+        "complex": "cpp",
+        "shared_mutex": "cpp",
+        "span": "cpp"
     }
 }

@@ -5,6 +5,7 @@
 #include <vector>
 #include <cmath>
 #include <list>
+#include "../Resources/pieces.h"
 class Board {
     Image spritesheet;
     Texture2D sprites;
@@ -17,10 +18,15 @@ class Board {
         Color tileSelectedColor = ORANGE;
         Color lastMoveColor = { 255, 109, 194, 80 };
         Board() {
-            spritesheet = LoadImage("../assets/pieces.png");
-            ImageResize(&spritesheet, 6*SQUARESIZE, 2*SQUARESIZE);
+            spritesheet = {0};
+            spritesheet.format = PIECES_FORMAT;
+            spritesheet.height = PIECES_HEIGHT;
+            spritesheet.width = PIECES_WIDTH;
+            spritesheet.data = PIECES_DATA;
+            spritesheet.mipmaps = 1;
             sprites = LoadTextureFromImage(spritesheet);
             resetBoard();
+            initPieces("white");
         }
         Board(std::string assets){
             resetBoard();
@@ -35,6 +41,7 @@ class Board {
         void initBishops();
         void initKings();
         void initQueens();
+        void initPieces(std::string front);
         void computeUpdatedScore(std::string nextPieceName, int mod);
         void computeScore();
         bool checkCheck(char color); //check if player is in check
@@ -112,14 +119,20 @@ std::priority_queue<Element, std::vector<Element>, Compare> Board::rankMoves(cha
 
 void Board::resetBoard() {
     lastMove = {-1, -1};
+    blackScore = 40;
+    whiteScore = 40;
     clearBoard();
     clearHighlights();
+}
+
+void Board::initPieces(std::string color) {
+    frontColor = color;
     initPawns();
-    initRooks();
     initKnights();
     initBishops();
-    initKings();
+    initRooks();
     initQueens();
+    initKings();
 }
 
 void Board::clearHighlights() {
@@ -151,7 +164,7 @@ bool Board::checkCheck(char currPlayer) {
 void Board::clearBoard() {
     for(int i = 0; i < BOARDSIZE; i++) {
         for(int j = 0; j < BOARDSIZE; j ++) {
-            Square newSquare = Square((i + j) % 2 == 0 ? RAYWHITE : GRAY);
+            Square newSquare = Square((i + j) % 2 == 0 ? WHITE : DARKGRAY);
             board[i][j] = newSquare;
         }
     }
@@ -542,7 +555,6 @@ std::string Board::getPiece(xy coords) {
 }
 
 void Board::initPawns() {
-
     for(int j = 0; j < BOARDSIZE; j++) {
         if(frontColor=="black") {
             board[1][j].changePiece("wpawn");
