@@ -12,12 +12,12 @@
 * **Two** player: Click two player and pass the computer to the person playing with the white pieces.
 
 ### Controls
-#### Keyboard
-*  `CMD + Z`: undo move.
 #### Mouse
 * `LEFT CLICK`: Select Piece / Move Piece.
+#### Keyboard
+*  `CMD + Z`: undo move.
 
-### Media
+### Screenshots
 ![players](./Resources/players.png)
 ![board](./Resources/board.png)
 
@@ -30,6 +30,21 @@
  - Chess assets are courtesy of [Wildlife Studios](https://wildlifestudios.itch.io/chess-set-pixel-art)
 
 > *Copyright (c) 2024 Brendan Lynch github/brendanml*
+
+## Playing the Game!
+1. Clone the repository to your and run as executable.
+```zsh
+cd ~/Downloads
+
+git clone https://github.com/brendanml/ShallowMind_ChessAI.git
+
+cd ShallowMind_ChessAI/src
+
+./app
+```
+2. Download on itch.io
+- **IMPORTANT**: Apple will make the app as ***DAMAGED*** as I am not a certified app developer. You will need to run `"xattr -cr <path/to/Chess.app"` in terminal to be able to play the game.
+
 
 ## Notes On Development
 
