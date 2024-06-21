@@ -32,7 +32,7 @@
 > *Copyright (c) 2024 Brendan Lynch github/brendanml*
 
 ## Playing the Game!
-1. Clone the repository to your and run as executable.
+### Option 1: Clone the repository to your and run as executable.
 ```zsh
 cd ~/Downloads
 
@@ -42,14 +42,14 @@ cd ShallowMind_ChessAI/src
 
 ./app
 ```
-2. Download on itch.io
-- **IMPORTANT**: Apple will make the app as ***DAMAGED*** as I am not a certified app developer. You will need to run `"xattr -cr <path/to/Chess.app"` in terminal to be able to play the game.
+### Option 2: Download on [itch.io](https://badongo.itch.io/shallowmind-chessai)
+- **IMPORTANT**: Apple will make the app as ***DAMAGED*** as I am not a certified app developer. You will need to run `"xattr -cr <path/to/Chess.app>"` in terminal to be able to play the game.
 
 
 ## Notes On Development
 
 ### Inspiration
-- Growing up an avid chess player I was motivated to write my own Chess AI following an introductory course on AI at university.
+- I was motivated to write my own Chess AI because I love chess and I took an AI at university.
 
 ### How I built it...
 - C++, raylib, statically built
