@@ -20,6 +20,7 @@
 ### Screenshots
 ![players](./Resources/players.png)
 ![board](./Resources/board.png)
+![demo](./Resources/output.gif)
 
 ### Links
  - youtube.com: [YouTube Video](https://www.youtube.com/channel/UCnr_HtDpLTYRbjR-2wZvfKQ)
