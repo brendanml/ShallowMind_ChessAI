@@ -43,7 +43,7 @@ cd ShallowMind_ChessAI/src
 ./app
 ```
 ### Option 2: Download on [itch.io](https://badongo.itch.io/shallowmind-chessai)
-- **IMPORTANT**: Apple will make the app as ***DAMAGED*** as I am not a certified app developer. You will need to run `"xattr -cr <path/to/Chess.app>"` in terminal to be able to play the game.
+- **IMPORTANT**: Apple will make the app as ***DAMAGED*** as I am not a certified app developer. You will need to run `"xattr -cr <path/to/ShallowMind.app>"` in terminal to be able to play the game.
 
 
 ## Notes On Development
