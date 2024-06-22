@@ -23,7 +23,7 @@
 ![demo](./Resources/output.gif)
 
 ### Links
- - youtube.com: [YouTube Video](https://www.youtube.com/channel/UCnr_HtDpLTYRbjR-2wZvfKQ)
+ - youtube.com: [YouTube Video](https://www.youtube.com/watch?v=kNM1cPyCSfA&t=26s)
  - itch.io: [ShallowMind Chess AI](https://badongo.itch.io/shallowmind-chessai)
 
 ### Developers
